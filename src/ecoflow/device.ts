@@ -181,6 +181,16 @@ export class River3Device extends EventEmitter {
     return Math.abs(this.number('pow_get_12v') ?? 0);
   }
 
+  /** Lifetime energy delivered by the AC outlets, in watt-hours, if the unit has reported it. */
+  get acOutputEnergyWh(): number | undefined {
+    return this.number('ac_out_energy');
+  }
+
+  /** Lifetime energy delivered by the 12 V outlet, in watt-hours, if the unit has reported it. */
+  get dcOutputEnergyWh(): number | undefined {
+    return this.number('dc12v_out_energy');
+  }
+
   isOn(control: Exclude<ControlName, 'ledMode'>): boolean {
     return (this.number(CONTROLS[control].stateKey) ?? 0) !== 0;
   }

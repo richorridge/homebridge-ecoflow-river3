@@ -14,6 +14,13 @@ export const KNOWN_SERIAL_PREFIXES: Record<string, string> = {
   R655: 'RIVER 3',
 };
 
+/** How the unit is presented: "auto" uses Matter when the bridge has it switched on, HomeKit otherwise. */
+export type Protocol = 'auto' | 'homekit' | 'matter';
+
+export function readProtocol(raw: unknown): Protocol {
+  return raw === 'homekit' || raw === 'matter' ? raw : 'auto';
+}
+
 export interface DeviceConfig {
   name: string;
   serialNumber: string;

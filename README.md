@@ -8,16 +8,31 @@ A [Homebridge](https://homebridge.io) plugin that adds the **EcoFlow RIVER 3** a
 
 | In Home | What it does |
 |---|---|
+| **AC Outlets** | Turns the AC sockets on and off. Over Matter it also reports power in watts and lifetime energy |
+| **12V Outlet** | Turns the 12 V car socket on and off, with the same power and energy readings over Matter |
 | **Battery** | Charge level, charging state and a low-battery warning |
-| **AC Outlets** | Turns the AC sockets on and off, and shows whether anything is drawing power |
-| **12V Outlet** | Turns the 12 V car socket on and off |
 | **Light** (RIVER 3 Plus) | The light bar: off, dim (50% or below) or bright |
 | **Mains Power** | A contact sensor that opens when mains power is lost, for power-cut notifications and automations |
 | **X-Boost** (optional) | A switch for X-Boost |
 
-The two outlets also carry a "Consumption" value in watts, which third-party apps such as Eve and Controller for HomeKit can show. Apple's Home app has no way to display watts.
+When the unit cannot be reached, HomeKit tiles show "No Response" and Matter commands fail.
 
-When the unit cannot be reached, its tiles show "No Response".
+## Watts in Apple Home: Matter or HomeKit
+
+Apple Home shows power use only for devices that report it over **Matter** (reported as new in iOS 27). The older HomeKit protocol has no standard watts value. So the plugin can present the unit either way:
+
+| | Matter | HomeKit |
+|---|---|---|
+| Watts and energy in Apple Home | Yes | No (third-party apps such as Eve can show watts) |
+| Needs | Homebridge 2.3 or later, with Matter switched on for the bridge the plugin runs on | Homebridge 1.8 or later |
+| Pair using | The bridge's **Matter** pairing code | The bridge's HomeKit code |
+| Appears in Home as | Separate devices: AC Outlets, 12V Outlet, Light, Mains Power. The battery is attached to the first of them | One accessory with several tiles |
+
+By default (`"protocol": "auto"`) the plugin uses Matter whenever Matter is switched on for its bridge, and HomeKit otherwise. It uses one or the other, never both, so nothing appears twice. Moving from one to the other removes the old accessories, so rooms and automations need setting up again.
+
+To switch Matter on, open the bridge's settings in the Homebridge UI (the main bridge, or the plugin's child bridge if it has one) and enable Matter, then restart and pair with the Matter code shown there.
+
+Homebridge 2.5 accepts all of these Matter devices, including the power, energy and battery features, and that is covered by the tests. How Apple Home then displays them has not been checked.
 
 ## How it works, and what that means for you
 
@@ -29,7 +44,7 @@ EcoFlow has not added the RIVER 3 family to its official developer API, so this 
 
 ## Install
 
-Homebridge 1.8 or later (including Homebridge 2) and Node.js 20.18 or later.
+Homebridge 1.8 or later and Node.js 20.18 or later. For watts in Apple Home you need Homebridge 2.3 or later.
 
 ```bash
 npm install -g git+https://github.com/richorridge/homebridge-ecoflow-river3.git
@@ -61,6 +76,7 @@ Use the settings form in the Homebridge UI, or add this to the `platforms` list 
 |---|---|---|
 | `email`, `password` | Your EcoFlow app account | none |
 | `apiHost` | EcoFlow region: `api.ecoflow.com` (global and US), `api-e.ecoflow.com` (Europe) or `api-a.ecoflow.com` (Americas) | `api.ecoflow.com` |
+| `protocol` | `auto`, `matter` or `homekit`. See "Watts in Apple Home" above | `auto` |
 | `simulate` | Show a pretend RIVER 3 Plus without signing in | `false` |
 | `devices[].name` | Name shown in Home | `RIVER 3` |
 | `devices[].serialNumber` | On the label under the unit and in the EcoFlow app | none |
@@ -95,7 +111,8 @@ Change something in the EcoFlow app while it runs and the change should appear i
 
 ## Known limits
 
-- Input and output watts, charge limits, charging speed and timers are not shown in Apple's Home app. Use the EcoFlow app for those.
+- Only the AC and 12 V outputs report watts. Input power, USB power, charge limits, charging speed and timers are not exposed. Use the EcoFlow app for those.
+- Lifetime energy only appears once the unit has sent its statistics, which may take a while after start-up.
 - The unit can be switched off remotely but not back on, so the plugin has no power switch.
 - The mains sensor relies on the unit's "AC charger connected" flag. Whether that flag drops the moment mains fails has not been confirmed on a real unit.
 - Extra batteries (EB300, EB600) are included in the overall battery level but are not shown separately.
@@ -111,7 +128,7 @@ npm install
 npm test
 ```
 
-The tests cover the wire protocol (against fixtures generated from the reference implementation), sign-in, the cloud connection and its retry rules, device state, and the HomeKit accessory using Homebridge's own classes with the built-in simulator.
+The tests cover the wire protocol (against fixtures generated from the reference implementation), sign-in, the cloud connection and its retry rules, device state, the HomeKit accessory using Homebridge's own classes, and the Matter accessories, all with the built-in simulator.
 
 To regenerate the reference fixtures, see `scripts/make_reference_fixtures.py`.
 

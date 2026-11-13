@@ -28,9 +28,50 @@
         "type": "string",
         "default": "api.ecoflow.com",
         "oneOf": [
-          { "title": "Global and US (api.ecoflow.com)", "enum": ["api.ecoflow.com"] },
-          { "title": "Europe (api-e.ecoflow.com)", "enum": ["api-e.ecoflow.com"] },
-          { "title": "Americas (api-a.ecoflow.com)", "enum": ["api-a.ecoflow.com"] }
+          {
+            "title": "Global and US (api.ecoflow.com)",
+            "enum": [
+              "api.ecoflow.com"
+            ]
+          },
+          {
+            "title": "Europe (api-e.ecoflow.com)",
+            "enum": [
+              "api-e.ecoflow.com"
+            ]
+          },
+          {
+            "title": "Americas (api-a.ecoflow.com)",
+            "enum": [
+              "api-a.ecoflow.com"
+            ]
+          }
+        ]
+      },
+      "protocol": {
+        "title": "Connect to Apple Home using",
+        "description": "Matter lets Apple Home show power in watts. It needs Homebridge 2.3 or later with Matter switched on for this bridge, and you pair with the bridge's Matter code. Automatic uses Matter when it is switched on and HomeKit otherwise.",
+        "type": "string",
+        "default": "auto",
+        "oneOf": [
+          {
+            "title": "Automatic",
+            "enum": [
+              "auto"
+            ]
+          },
+          {
+            "title": "Matter (shows watts)",
+            "enum": [
+              "matter"
+            ]
+          },
+          {
+            "title": "HomeKit (no watts in the Home app)",
+            "enum": [
+              "homekit"
+            ]
+          }
         ]
       },
       "simulate": {
@@ -97,8 +138,12 @@
   "layout": [
     "name",
     "email",
-    { "key": "password", "type": "password" },
+    {
+      "key": "password",
+      "type": "password"
+    },
     "apiHost",
+    "protocol",
     "simulate",
     {
       "key": "devices",
